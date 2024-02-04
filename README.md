@@ -1,4 +1,4 @@
-# SIMPLE USER MANAGEMENT SYSTEM WRITTIN IN GO
+# User Management System written in Go
 
 ## Description
 A simple program exposing a RESTful API with crud operations on managing users and 
