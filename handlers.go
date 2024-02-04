@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (u *UserData) BeforeCreate(tx *gorm.DB) (err error) {
+func validateParams(u *UserData) (err error) {
 	if u.User.Name == "" {
 		return errors.New("name is required")
 	}
@@ -21,15 +21,12 @@ func (u *UserData) BeforeCreate(tx *gorm.DB) (err error) {
 	return
 }
 
-func (u *UserData) BeforeUpdate(tx *gorm.DB) (err error) {
-	if u.User.Name == "" {
-		return errors.New("name is required")
-	}
+func (u *UserData) BeforeCreate(tx *gorm.DB) (err error) {
+	return validateParams(u)
+}
 
-	if u.User.Email == "" {
-		return errors.New("email is required")
-	}
-	return
+func (u *UserData) BeforeUpdate(tx *gorm.DB) (err error) {
+	return validateParams(u)
 }
 
 func (u *UserData) AfterSave(tx *gorm.DB) (err error) {
