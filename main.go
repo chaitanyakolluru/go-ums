@@ -33,6 +33,7 @@ func main() {
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			c.Set("db", db)
+			c.Get("db").(*gorm.DB).Find(&users)
 			return next(c)
 		}
 	})
