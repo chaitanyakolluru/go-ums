@@ -58,9 +58,9 @@ func saveUser(c echo.Context) error {
 func deleteUser(c echo.Context) error {
 	id := c.Param("id")
 
-	for i, user := range users {
+	for _, user := range users {
 		if id == fmt.Sprintf("%d", user.ID) {
-			c.Get("db").(*gorm.DB).Delete(&users[i], id)
+			c.Get("db").(*gorm.DB).Delete(&user, id)
 			return c.JSON(http.StatusOK, "user deleted")
 		}
 	}
@@ -75,9 +75,9 @@ func updateUser(c echo.Context) error {
 		return err
 	}
 
-	for i, user := range users {
+	for _, user := range users {
 		if id == fmt.Sprintf("%d", user.ID) {
-			c.Get("db").(*gorm.DB).Model(&users[i]).Updates(UserData{User: *u})
+			c.Get("db").(*gorm.DB).Model(&user).Updates(UserData{User: *u})
 			return c.JSON(http.StatusOK, "user updated")
 		}
 	}
