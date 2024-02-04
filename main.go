@@ -28,27 +28,29 @@ func saveUser(c echo.Context) error {
 		return err
 	}
 
+	c.Get("db").(*gorm.DB).Find(&users)
 	for _, user := range users {
 		if user.User.Name == u.Name {
 			return c.JSON(http.StatusConflict, "user already exists")
 		}
 	}
 
-	users = append(users, UserData{ID: len(users) + 1, User: *u})
+	c.Get("db").(*gorm.DB).Create(&UserData{User: *u})
 	return c.JSON(http.StatusCreated, u)
 }
 
 func deleteUser(c echo.Context) error {
 	id := c.Param("id")
 
+	c.Get("db").(*gorm.DB).Find(&users)
 	for i, user := range users {
 		if id == fmt.Sprintf("%d", user.ID) {
-			users = append(users[:i], users[i+1:]...)
+			c.Get("db").(*gorm.DB).Delete(&users[i], id)
 			return c.JSON(http.StatusOK, id)
 		}
 	}
 
-	return c.JSON(http.StatusNotFound, "user deleted")
+	return c.JSON(http.StatusNotFound, "user not found")
 }
 
 func updateUser(c echo.Context) error {
@@ -58,9 +60,10 @@ func updateUser(c echo.Context) error {
 		return err
 	}
 
+	c.Get("db").(*gorm.DB).Find(&users)
 	for i, user := range users {
 		if id == fmt.Sprintf("%d", user.ID) {
-			users[i].User = *u
+			c.Get("db").(*gorm.DB).Model(&users[i]).Updates(UserData{User: *u})
 			return c.JSON(http.StatusOK, users[i])
 		}
 	}
@@ -69,14 +72,17 @@ func updateUser(c echo.Context) error {
 }
 
 func getUsers(c echo.Context) error {
+	c.Get("db").(*gorm.DB).Find(&users)
 	return c.JSON(http.StatusOK, users)
 }
 
 func getUser(c echo.Context) error {
 	id := c.Param("id")
 
+	c.Get("db").(*gorm.DB).Find(&users)
 	for _, u := range users {
 		if id == fmt.Sprintf("%d", u.ID) {
+			c.Get("db").(*gorm.DB).First(&u, id)
 			return c.JSON(http.StatusOK, u)
 		}
 	}
@@ -93,9 +99,16 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(db)
 
+	db.AutoMigrate(&UserData{})
 	e := echo.New()
+
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Set("db", db)
+			return next(c)
+		}
+	})
 
 	e.GET("/healthz", healthCheck)
 	e.POST("/users", saveUser)
