@@ -1,4 +1,4 @@
-module ums-backend
+module github.com/chaitanyakolluru/go-ums-backend
 
 go 1.21.0
 
