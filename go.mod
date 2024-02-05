@@ -1,4 +1,4 @@
-module ums
+module ums-backend
 
 go 1.21.0
 
