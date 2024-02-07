@@ -13,7 +13,7 @@ import (
 func SaveUser(c echo.Context) error {
 	u := new(model.User)
 	if err := c.Bind(u); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, "invalid request")
 	}
 
 	for _, user := range model.Users {
@@ -52,13 +52,16 @@ func UpdateUser(c echo.Context) error {
 	id := c.Param("id")
 	u := new(model.User)
 	if err := c.Bind(u); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, "invalid request")
 	}
 
 	for _, user := range model.Users {
 		if id == fmt.Sprintf("%d", user.ID) {
 			c.Get("db").(*gorm.DB).Model(&user).Updates(model.UserData{User: *u})
-			return c.JSON(http.StatusOK, "user updated")
+			return c.JSON(http.StatusOK, map[string]interface{}{
+				"message": "user updated",
+				"ID":      id,
+			})
 		}
 	}
 
