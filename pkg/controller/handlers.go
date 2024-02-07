@@ -18,12 +18,21 @@ func SaveUser(c echo.Context) error {
 
 	for _, user := range model.Users {
 		if user.User.Name == u.Name {
-			return c.JSON(http.StatusConflict, "user already exists")
+			return c.JSON(http.StatusConflict,
+				map[string]interface{}{
+					"message": "user already exists",
+					"ID":      0,
+				})
 		}
 	}
 
-	c.Get("db").(*gorm.DB).Create(&model.UserData{User: *u})
-	return c.JSON(http.StatusCreated, "user created")
+	userToSave := &model.UserData{User: *u}
+	c.Get("db").(*gorm.DB).Create(userToSave)
+	return c.JSON(http.StatusCreated,
+		map[string]interface{}{
+			"message": "user created",
+			"ID":      userToSave.ID,
+		})
 }
 
 func DeleteUser(c echo.Context) error {
